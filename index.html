@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake and News Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Tab styling */
+        .tab {
+            overflow: hidden;
+            background-color: #f1f1f1;
+        }
+
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border-top: none;
+        }
+
+        .tabcontent.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Deepfake and News Detection App</h1>
+
+        <!-- Tabs for switching sections -->
+        <div class="tab">
+            <button class="tablinks {% if not news_active %}active{% endif %}" onclick="openSection(event, 'deepfake-section')">Face Detection</button>
+            <button class="tablinks {% if news_active %}active{% endif %}" onclick="openSection(event, 'news-section')">News Detection</button>
+        </div>
+
+        <!-- Deepfake Section -->
+        <div id="deepfake-section" class="tabcontent {% if not news_active %}active{% endif %}">
+            <h2>Deepfake Face Detection</h2>
+            <form action="/predict_deepfake" method="post" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*" required>
+                <button type="submit">Upload Image</button>
+            </form>
+
+            {% if deepfake_output %}
+                <h3>Deepfake Prediction</h3>
+                <p>Real Probability: {{ "%.4f"|format(real_prob) }}%</p>
+                <p>Fake Probability: {{ "%.4f"|format(fake_prob) }}%</p>
+                <h3>Final Result: {{ final_output }}</h3>
+                <img src="data:image/jpeg;base64,{{ face_with_mask }}" alt="Face with Mask" />
+            {% endif %}
+        </div>
+
+        <!-- News Detection Section -->
+        <div id="news-section" class="tabcontent {% if news_active %}active{% endif %}">
+            <h2>News Detection</h2>
+            <form action="/predict_news" method="post">
+                <textarea name="news_text" rows="4" cols="50" placeholder="Enter news text here..." required></textarea>
+                <button type="submit">Submit News</button>
+            </form>
+
+            {% if news_output %}
+                <h3>News Prediction</h3>
+                <p>Prediction: {{ news_prediction }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function openSection(evt, sectionName) {
+            const tabcontent = document.getElementsByClassName("tabcontent");
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove('active');
+            }
+
+            const tablinks = document.getElementsByClassName("tablinks");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove('active');
+            }
+
+            document.getElementById(sectionName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>
